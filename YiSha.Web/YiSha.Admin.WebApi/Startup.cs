@@ -32,11 +32,42 @@ namespace YiSha.Admin.WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            #region Auth
+            //Bearer 的scheme定义
+            var securityScheme = new OpenApiSecurityScheme()
+            {
+                Description = "JWT Authorization header using the  scheme. Example: \"Authorization: {token}\"",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "",
+                BearerFormat = "JWT"
+            };
+            var securityRequirement = new OpenApiSecurityRequirement
+                    {
+                        {
+                                new OpenApiSecurityScheme
+                                {
+                                    Reference = new OpenApiReference
+                                    {
+                                        Type = ReferenceType.SecurityScheme,
+                                        Id = "token"
+                                    }
+                                },
+                                new string[] {}
+                        }
+                    };
+
+            #endregion
+
             services.AddSwaggerGen(options =>
             {
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml");
                 options.SwaggerDoc("v1", new OpenApiInfo { Title = "YiSha Api", Version = "v1" });
                 options.IncludeXmlComments(xmlPath, true);
+
+                options.AddSecurityDefinition("token", securityScheme);
+                options.AddSecurityRequirement(securityRequirement);
             });
 
             services.AddOptions();

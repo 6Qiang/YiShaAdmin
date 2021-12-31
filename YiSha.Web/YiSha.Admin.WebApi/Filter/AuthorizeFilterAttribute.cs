@@ -28,6 +28,8 @@ namespace YiSha.Admin.WebApi.Controllers
         /// 忽略token的方法
         /// </summary>
         public static readonly string[] IgnoreToken = { "GetWxOpenId", "Login", "LoginOff" };
+        private static readonly MenuAuthorizeBLL menuAuthorizeBLL = new MenuAuthorizeBLL();
+        private static readonly MenuBLL menuBLL = new MenuBLL();
 
         /// <summary>
         /// 异步接口日志
@@ -40,10 +42,51 @@ namespace YiSha.Admin.WebApi.Controllers
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
-            string token = context.HttpContext.Request.Headers["ApiToken"].ParseToString();
+            ActionExecutedContext resultContext = null;
+            string token = context.HttpContext.Request.Headers["Authorization"].ParseToString();
+
+            var actionName = context.ActionDescriptor.RouteValues["action"];
+
             OperatorInfo user = await Operator.Instance.Current(token);
             if (user != null)
             {
+
+                #region 验证权限
+                var temp = await menuAuthorizeBLL.GetAuthorizeList(user);
+                // 获取当前请求的URL
+                var url = context.HttpContext.Request.Path.ToString();
+                var menu = menuBLL.GetEntity(url);
+                if (menu != null && menu.Result.Data != null)
+                {
+                    var menuid = menu.Result.Data.Id;
+                    var t = temp.Data.Where(w => w.MenuId == menuid).Any();
+                    if (t)
+                    {
+                        //有授权
+                    }
+                    else
+                    {
+                        //未授权
+                        //context.HttpContext.Response.StatusCode = 401;
+                        TData obj = new TData();
+                        obj.Tag = 0;
+                        obj.Message = "抱歉，您没有权限";
+                        context.Result = new JsonResult(obj);
+                        return;
+                    }
+                }
+                else
+                {
+                    //未授权
+                    //context.HttpContext.Response.StatusCode = 401;
+                    TData obj = new TData();
+                    obj.Tag = 0;
+                    obj.Message = "抱歉，您没有权限";
+                    context.Result = new JsonResult(obj);
+                    return;
+                }
+                #endregion
+                resultContext = await next();
                 // 根据传入的Token，设置CustomerId
                 if (context.ActionArguments != null && context.ActionArguments.Count > 0)
                 {
@@ -67,7 +110,20 @@ namespace YiSha.Admin.WebApi.Controllers
                     }
                 }
             }
-            var resultContext = await next();
+            else
+            {
+                if (IgnoreToken.Contains(actionName))
+                {
+                    resultContext = await next();
+                }
+                else
+                {
+                    context.HttpContext.Response.StatusCode = 401;
+                    return;
+                }
+
+            }
+            
 
             sw.Stop();
 

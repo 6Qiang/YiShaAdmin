@@ -81,6 +81,20 @@ namespace YiSha.Business.SystemManage
             return obj;
         }
 
+
+        /// <summary>
+        /// 根据请求API URL，获取在菜单中定义的数据项，以根据ID 判断当前用户是否有权限
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public async Task<TData<MenuEntity>> GetEntity(string url)
+        {
+            TData<MenuEntity> obj = new TData<MenuEntity>();
+            obj.Data = await menuService.GetEntity(url);
+            obj.Tag = 1;
+            return obj;
+        }
+
         public async Task<TData<int>> GetMaxSort(long parentId)
         {
             TData<int> obj = new TData<int>();

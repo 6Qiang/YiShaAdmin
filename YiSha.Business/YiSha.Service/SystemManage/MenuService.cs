@@ -26,6 +26,16 @@ namespace YiSha.Service.SystemManage
             return await this.BaseRepository().FindEntity<MenuEntity>(id);
         }
 
+        /// <summary>
+        /// 根据Url获取菜单项
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public async Task<MenuEntity> GetEntity(string url)
+        {
+            return await this.BaseRepository().FindEntity<MenuEntity>(w => w.MenuUrl.ToLower() == url.ToLower());
+        }
+
         public async Task<int> GetMaxSort(long parentId)
         {
             string where = string.Empty;
