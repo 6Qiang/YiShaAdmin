@@ -80,6 +80,9 @@
                         else if (item.MenuType == "@MenuTypeEnum.Button.ParseToInt()") {
                             return '<span class="label label-warning">@MenuTypeEnum.Button.GetDescription()</span>';
                         }
+                        else if (item.MenuType == "@MenuTypeEnum.API.ParseToInt()") {
+                            return '<span class="label label-danger">@MenuTypeEnum.API.GetDescription()</span>';
+                        }
                     }
                 },
                 { field: 'MenuSort', title: '显示顺序', width: '10%', align: "left" },

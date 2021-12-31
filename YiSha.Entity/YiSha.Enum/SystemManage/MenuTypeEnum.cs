@@ -16,6 +16,9 @@ namespace YiSha.Enum.SystemManage
         Menu = 2,
 
         [Description("按钮")]
-        Button = 3
+        Button = 3,
+
+        [Description("API")]
+        API = 4
     }
 }
